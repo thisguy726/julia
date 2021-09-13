@@ -1081,7 +1081,6 @@ function iterate(r::Iterators.Reverse{<:EachLine})
                 break
             end
         end
-        p == 0 && break
     end
     return iterate(r, (p, chunks, 1, inewline, length(chunks), jnewline == 0 && !isempty(chunks) ? length(chunks[end])+1 : jnewline))
 end
