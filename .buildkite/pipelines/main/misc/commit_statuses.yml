@@ -72,15 +72,9 @@ steps:
       echo "All `package` jobs completed successfully."
   - label: "test"
     key: "test"
-    allow_dependency_failure: true
-    depends_on:
-      - "embedding"
-      - "llvmpasses"
-      - "tester_linux32"
-      - "tester_linux64_st"
-      - "tester_linux64_mt"
-      - "tester_linux64_st_rr"
-      - "tester_linux64_mt_rr"
+    notify:
+      - github_commit_status:
+          context: "test"
     plugins:
       - JuliaCI/julia#v1:
           version: 1.6
@@ -93,13 +87,23 @@ steps:
             # Include `/cache/repos` so that our `git` version introspection works.
             - "/cache/repos:/cache/repos"
     timeout_in_minutes: 10
-    notify:
-      - github_commit_status:
-          context: "test"
+    allow_dependency_failure: true
+    depends_on:
+      - "embedding"
+      - "llvmpasses"
+      # - "tester_linux32"
+      - "tester_linux32_st"
+      - "tester_linux32_mt"
+      - "tester_linux64_st"
+      - "tester_linux64_mt"
+      - "tester_linux64_st_rr"
+      - "tester_linux64_mt_rr"
+      # - "tester_linux64_rr"
     commands: |
       echo "embedding:            $(buildkite-agent step get "outcome" --step "embedding")"
       echo "llvmpasses:           $(buildkite-agent step get "outcome" --step "llvmpasses")"
-      echo "tester_linux32:       $(buildkite-agent step get "outcome" --step "tester_linux32")"
+      echo "tester_linux32:       $(buildkite-agent step get "outcome" --step "tester_linux32_st")"
+      echo "tester_linux32:       $(buildkite-agent step get "outcome" --step "tester_linux32_mt")"
       echo "tester_linux64_st:    $(buildkite-agent step get "outcome" --step "tester_linux64_st")"
       echo "tester_linux64_mt:    $(buildkite-agent step get "outcome" --step "tester_linux64_mt")"
       echo "tester_linux64_st_rr: $(buildkite-agent step get "outcome" --step "tester_linux64_st_rr")"
