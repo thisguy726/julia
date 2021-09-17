@@ -72,6 +72,7 @@ steps:
       echo "All `package` jobs completed successfully."
   - label: "test"
     key: "test"
+    allow_dependency_failure: true
     depends_on:
       - "embedding"
       - "llvmpasses"
@@ -96,4 +97,18 @@ steps:
       - github_commit_status:
           context: "test"
     commands: |
-      echo "All `test` jobs completed successfully."
+      echo "embedding:            $(buildkite-agent step get "outcome" --step "embedding")"
+      echo "llvmpasses:           $(buildkite-agent step get "outcome" --step "llvmpasses")"
+      echo "tester_linux32:       $(buildkite-agent step get "outcome" --step "tester_linux32")"
+      echo "tester_linux64_st:    $(buildkite-agent step get "outcome" --step "tester_linux64_st")"
+      echo "tester_linux64_mt:    $(buildkite-agent step get "outcome" --step "tester_linux64_mt")"
+      echo "tester_linux64_st_rr: $(buildkite-agent step get "outcome" --step "tester_linux64_st_rr")"
+      echo "tester_linux64_mt_rr: $(buildkite-agent step get "outcome" --step "tester_linux64_mt_rr")"
+      [[ "$(buildkite-agent step get "outcome" --step "embedding")"            != "passed" ]] && exit 1
+      [[ "$(buildkite-agent step get "outcome" --step "llvmpasses")"           != "passed" ]] && exit 1
+      [[ "$(buildkite-agent step get "outcome" --step "tester_linux32")"       != "passed" ]] && exit 1
+      [[ "$(buildkite-agent step get "outcome" --step "tester_linux64_st")"    != "passed" ]] && exit 1
+      [[ "$(buildkite-agent step get "outcome" --step "tester_linux64_mt")"    != "passed" ]] && exit 1
+      [[ "$(buildkite-agent step get "outcome" --step "tester_linux64_st_rr")" != "passed" ]] && exit 1
+      [[ "$(buildkite-agent step get "outcome" --step "tester_linux64_mt_rr")" != "passed" ]] && exit 1
+      exit 0
