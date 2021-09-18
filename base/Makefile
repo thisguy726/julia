@@ -46,7 +46,6 @@ ifeq ($(XC_HOST),)
 else
 	@echo "const MACHINE = \"$(XC_HOST)\"" >> $@
 endif
-	@echo "const libm_name = \"$(LIBMNAME)\"" >> $@
 	@echo "const libblas_name = \"$(LIBBLASNAME)\"" >> $@
 	@echo "const liblapack_name = \"$(LIBLAPACKNAME)\"" >> $@
 ifeq ($(USE_BLAS64), 1)
@@ -187,11 +186,11 @@ endef
 
 # the following excludes: libuv.a, libutf8proc.a
 
-ifneq ($(USE_SYSTEM_LIBM),0)
-$(eval $(call symlink_system_library,LIBM,$(LIBMNAME)))
-else ifneq ($(USE_SYSTEM_OPENLIBM),0)
-$(eval $(call symlink_system_library,OPENLIBM,$(LIBMNAME)))
-endif
+#ifneq ($(USE_SYSTEM_LIBM),0)
+#$(eval $(call symlink_system_library,LIBM,$(LIBMNAME)))
+#else ifneq ($(USE_SYSTEM_OPENLIBM),0)
+#$(eval $(call symlink_system_library,OPENLIBM,$(LIBMNAME)))
+#endif
 
 $(eval $(call symlink_system_library,CSL,libgcc_s,1))
 ifneq (,$(LIBGFORTRAN_VERSION))

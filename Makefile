@@ -249,7 +249,9 @@ ifeq ($(BUNDLE_DEBUG_LIBS),1)
 	-$(INSTALL_M) $(build_bindir)/libjulia-debug.dll $(DESTDIR)$(bindir)/
 	-$(INSTALL_M) $(build_libdir)/libjulia-debug.dll.a $(DESTDIR)$(libdir)/
 endif
+	ifeq ($(USE_SYSTEM_LIBM),0)
 	-$(INSTALL_M) $(build_bindir)/libopenlibm.dll.a $(DESTDIR)$(libdir)/
+	endif
 else
 
 # Copy over .dSYM directories directly for Darwin

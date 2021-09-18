@@ -164,9 +164,9 @@ endif
 
 # list all targets
 DEP_LIBS_STAGED_ALL := llvm llvm-tools clang llvmunwind unwind libuv pcre \
-	openlibm dsfmt blastrampoline openblas lapack gmp mpfr patchelf utf8proc \
+	dsfmt blastrampoline openblas lapack gmp mpfr patchelf utf8proc \
 	objconv mbedtls libssh2 nghttp2 curl libgit2 libwhich zlib p7zip csl \
-	libsuitesparse
+	libsuitesparse # openlibm
 DEP_LIBS_ALL := $(DEP_LIBS_STAGED_ALL)
 
 ifneq ($(USE_BINARYBUILDER_OPENBLAS),0)
@@ -204,7 +204,7 @@ include $(SRCDIR)/csl.mk
 include $(SRCDIR)/llvm.mk
 include $(SRCDIR)/libuv.mk
 include $(SRCDIR)/pcre.mk
-include $(SRCDIR)/openlibm.mk
+#include $(SRCDIR)/openlibm.mk
 include $(SRCDIR)/dsfmt.mk
 include $(SRCDIR)/objconv.mk
 include $(SRCDIR)/blastrampoline.mk

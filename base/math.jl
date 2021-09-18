@@ -365,8 +365,6 @@ log(b::Number, x::Number) = log(promote(b,x)...)
 
 # type specific math functions
 
-const libm = Base.libm_name
-
 # functions with no domain error
 """
     sinh(x)
@@ -881,9 +879,9 @@ function frexp(x::T) where T<:IEEEFloat
 end
 
 rem(x::Float64, y::Float64, ::RoundingMode{:Nearest}) =
-    ccall((:remainder, libm),Float64,(Float64,Float64),x,y)
+    ccall(:remainder, Float64,(Float64,Float64),x,y)
 rem(x::Float32, y::Float32, ::RoundingMode{:Nearest}) =
-    ccall((:remainderf, libm),Float32,(Float32,Float32),x,y)
+    ccall(:remainderf, Float32,(Float32,Float32),x,y)
 rem(x::Float16, y::Float16, r::RoundingMode{:Nearest}) = Float16(rem(Float32(x), Float32(y), r))
 
 
@@ -906,13 +904,13 @@ modf(x) = isinf(x) ? (flipsign(zero(x), x), x) : (rem(x, one(x)), trunc(x))
 
 function modf(x::Float32)
     temp = Ref{Float32}()
-    f = ccall((:modff, libm), Float32, (Float32, Ptr{Float32}), x, temp)
+    f = ccall(:modff, Float32, (Float32, Ptr{Float32}), x, temp)
     f, temp[]
 end
 
 function modf(x::Float64)
     temp = Ref{Float64}()
-    f = ccall((:modf, libm), Float64, (Float64, Ptr{Float64}), x, temp)
+    f = ccall(:modf, Float64, (Float64, Ptr{Float64}), x, temp)
     f, temp[]
 end
 
