@@ -385,11 +385,11 @@ macro propagate_inbounds(ex)
 end
 
 """
-    @compile
+    @force_compile
 
 Force compilation of the block or function (Julia's built-in interpreter is blocked from executing it).
 """
-macro compile() Expr(:meta, :compile) end
+macro force_compile() Expr(:meta, :force_compile) end
 
 """
     @polly
