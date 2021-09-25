@@ -893,7 +893,7 @@ function rem(x::Float64, p::Float64, ::RoundingMode{:Nearest})
         return NaN
     end
     if hp <= 0x7fdfffff
-        x = mod(x, p + p)  # now x < 2p
+        x = rem(x, p + p)  # now x < 2p
     end
     ((hx - hp) | (lx - lp)) == 0 && return 0.0
     x = abs(x)
@@ -932,7 +932,7 @@ function rem(x::Float32, p::Float32, ::RoundingMode{:Nearest})
         return NaN32
     end
     if hp <= 0x7effffff
-        x = mod(x, p + p)  # now x < 2p
+        x = rem(x, p + p)  # now x < 2p
     end
     hx - hp == 0 && return 0.0f0
     x = abs(x)
