@@ -880,10 +880,86 @@ function frexp(x::T) where T<:IEEEFloat
     return reinterpret(T, xu), k
 end
 
-rem(x::Float64, y::Float64, ::RoundingMode{:Nearest}) =
-    ccall((:remainder, libm),Float64,(Float64,Float64),x,y)
-rem(x::Float32, y::Float32, ::RoundingMode{:Nearest}) =
-    ccall((:remainderf, libm),Float32,(Float32,Float32),x,y)
+function rem(x::Float64, p::Float64, ::RoundingMode{:Nearest})
+    lx = lowword(x)
+    hx = poshighword(x)
+    sx = highword(x) & 0x80000000
+    lp = lowword(p)
+    hp = poshighword(p)
+    # Purge off exception values
+    if (hp | lp) == 0 ||  # p = 0
+        hx >= 0x7ff00000 ||  # x is not finite
+        (hp >= 0x7ff00000 && ((hp - 0x7ff00000) | lp) != 0)  # p is NaN
+        return NaN
+    end
+    if hp <= 0x7fdfffff
+        x = mod(x, p + p)  # now x < 2p
+    end
+    ((hx - hp) | (lx - lp)) == 0 && return 0.0
+    x = abs(x)
+    p = abs(p)
+    if hp < 0x00200000
+        if x + x > p
+            x -= p
+            if x + x >= p
+                x -= p
+            end
+        end
+    else
+        p_half = 0.5 * p
+        if x > p_half
+            x -= p
+            if x >= p_half
+                x -= p
+            end
+        end
+    end
+    hx = highword(x)
+    if (hx & 0x7fffffff) == 0
+        hx = zero(UInt32)
+    end
+    return reinterpret(Float64, (UInt64(xor(hx, sx)) << 32) | UInt64(lowword(x)))
+end
+
+function rem(x::Float32, p::Float32, ::RoundingMode{:Nearest})
+    hx = poshighword(x)
+    sx = highword(x) & 0x80000000
+    hp = poshighword(p)
+    # Purge off exception values
+    if hp == 0 ||  # p = 0
+        hx >= 0x7f800000 ||  # x is not finite
+        hp > 0x7f800000  # p is NaN
+        return NaN32
+    end
+    if hp <= 0x7effffff
+        x = mod(x, p + p)  # now x < 2p
+    end
+    hx - hp == 0 && return 0.0f0
+    x = abs(x)
+    p = abs(p)
+    if hp < 0x01000000
+        if x + x > p
+            x -= p
+            if x + x >= p
+                x -= p
+            end
+        end
+    else
+        p_half = 0.5f0 * p
+        if x > p_half
+            x -= p
+            if x >= p_half
+                x -= p
+            end
+        end
+    end
+    hx = highword(x)
+    if (hx & 0x7fffffff) == 0
+        hx = zero(UInt32)
+    end
+    return reinterpret(Float32, xor(hx, sx))
+end
+
 rem(x::Float16, y::Float16, r::RoundingMode{:Nearest}) = Float16(rem(Float32(x), Float32(y), r))
 
 
@@ -1196,6 +1272,16 @@ Return positive part of the high word of `x` as a `UInt32`.
 @inline poshighword(x::Float64) = poshighword(reinterpret(UInt64, x))
 @inline poshighword(x::UInt64)  = highword(x) & 0x7fffffff
 @inline poshighword(x::Float32) = highword(x) & 0x7fffffff
+
+"""
+    lowword(x)
+
+Return the low word of `x` as a `UInt32`.
+"""
+@inline lowword(x::Float64) = lowword(reinterpret(UInt64, x))
+@inline lowword(x::UInt64)  = (x & ((1 << 32) - 1)) % UInt32
+@inline lowword(x::Float32) = zero(UInt32)
+@inline lowword(x::UInt32)  = zero(UInt32)
 
 # More special functions
 include("special/cbrt.jl")
