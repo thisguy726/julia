@@ -41,6 +41,8 @@ Code coverage:
 
 ## The Julia Language
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/75f62933033a4613837cb5b3afca0049)](https://app.codacy.com/gh/thisguy726/julia?utm_source=github.com&utm_medium=referral&utm_content=thisguy726/julia&utm_campaign=Badge_Grade_Settings)
+
 Julia is a high-level, high-performance dynamic language for technical
 computing.  The main homepage for Julia can be found at
 [julialang.org](https://julialang.org/).  This is the GitHub
