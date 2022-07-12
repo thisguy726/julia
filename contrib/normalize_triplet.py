@@ -6,7 +6,7 @@ import re, sys
 # a method `platform_key_abi()` to parse uname-like output into something standarized.
 
 if len(sys.argv) < 2:
-    print("Usage: {} <host triplet> [<gcc version>] [<cxxabi11>]".format(sys.argv[0]))
+    print(f"Usage: {sys.argv[0]} <host triplet> [<gcc version>] [<cxxabi11>]")
     sys.exit(1)
 
 arch_mapping = {
@@ -45,7 +45,12 @@ cxx_abi_mapping = {
 
 # Helper function to collapse dictionary of mappings down into a regex of
 # named capture groups joined by "|" operators
-c = lambda mapping: "("+"|".join(["(?P<%s>%s)"%(k,v) for (k, v) in mapping.items()]) + ")"
+c = (
+    lambda mapping: "("
+    + "|".join([f"(?P<{k}>{v})" for (k, v) in mapping.items()])
+    + ")"
+)
+
 mondo_regex = re.compile(
     "^"+
     c(arch_mapping)+
@@ -101,35 +106,33 @@ def p(x):
     if x:
         for k in os_remapping:
             x = x.replace(k, os_remapping[k])
-        return '-' + x
+        return f'-{x}'
     return x
 
 # If the user passes in a GCC version (like 8.2.0) use that to force a
 # "-libgfortran5" tag at the end of the triplet, but only if it has otherwise
 # not been specified.
-if libgfortran_version == "blank_libgfortran":
-    if len(sys.argv) >= 3:
-        # If there was no gfortran/gcc version passed in, default to the latest libgfortran version
-        if not sys.argv[2]:
-            libgfortran_version = "libgfortran5"
+if libgfortran_version == "blank_libgfortran" and len(sys.argv) >= 3:
+    # If there was no gfortran/gcc version passed in, default to the latest libgfortran version
+    if not sys.argv[2]:
+        libgfortran_version = "libgfortran5"
+    else:
+        # Take the last thing that looks like a version number, and extract its major component
+        version_numbers = list(filter(lambda x: re.match("\d+\.\d+(\.\d+)?", x), sys.argv[2].split()))
+        major_ver = int(version_numbers[-1].split('.')[0])
+        if major_ver <= 6:
+            libgfortran_version = "libgfortran3"
+        elif major_ver <= 7:
+            libgfortran_version = "libgfortran4"
         else:
-            # Take the last thing that looks like a version number, and extract its major component
-            version_numbers = list(filter(lambda x: re.match("\d+\.\d+(\.\d+)?", x), sys.argv[2].split()))
-            major_ver = int(version_numbers[-1].split('.')[0])
-            if major_ver <= 6:
-                libgfortran_version = "libgfortran3"
-            elif major_ver <= 7:
-                libgfortran_version = "libgfortran4"
-            else:
-                libgfortran_version = "libgfortran5"
+            libgfortran_version = "libgfortran5"
 
-if cxx_abi == "blank_cxx_abi":
-    if len(sys.argv) == 4:
-        cxx_abi = {
-            "0": "cxx03",
-            "1": "cxx11",
-            "": "",
-        }[sys.argv[3]]
+if cxx_abi == "blank_cxx_abi" and len(sys.argv) == 4:
+    cxx_abi = {
+        "0": "cxx03",
+        "1": "cxx11",
+        "": "",
+    }[sys.argv[3]]
 
 print(arch+p(platform)+p(libc)+r(call_abi)+p(libgfortran_version)+p(cxx_abi))
 
